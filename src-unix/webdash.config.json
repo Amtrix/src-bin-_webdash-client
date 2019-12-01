@@ -1,0 +1,18 @@
+{
+    "commands": [
+        {
+            "name": "install",
+            "action": "bash install.sh"
+        },
+        {
+            "name": "build",
+            "actions": [
+                "rm build/webdash",
+                "make -C build"
+            ],
+            "dependencies": [
+                "/src/lib/webdash-executer/webdash.config.json:build"
+            ]
+        }
+    ]
+}
