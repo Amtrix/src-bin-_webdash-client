@@ -2,6 +2,15 @@
  * Tutorial on pipes: http://www.rozmichelle.com/pipes-forks-dups/
  **/
 
+// Local includes
+#include "global.hpp"
+
+// WebDash includes
+#include <webdash-config.hpp>
+#include <webdash-core.hpp>
+#include "../../common/websocket.h"
+
+// Standard includes
 #include <cstdio>
 #include <unistd.h> 
 #include <iostream>
@@ -10,16 +19,17 @@
 #include <nlohmann/json.hpp>
 #include <sys/wait.h>
 
-#include <webdash-config.hpp>
-
-#include "../../common/websocket.h"
 namespace fs = std::filesystem;
-using namespace std;
 
+using namespace std;
 using json = nlohmann::json;
+
+const string _WEBDASH_PROJECT_NAME_ = "webdash-client";
 
 int main(int argc, char **argv) {
     cout << "WebDash: Client" << endl;
+    cout << "   root: " << WebDashCore::Get().GetMyWorldRootDirectory() << endl;
+
     if (argc < 2) {
         cout << "Please provide the desired action." << endl;
         return 0;

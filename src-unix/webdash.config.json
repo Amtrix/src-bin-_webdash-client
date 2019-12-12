@@ -11,7 +11,7 @@
                 "make -C build"
             ],
             "dependencies": [
-                "/src/lib/webdash-executer/webdash.config.json:build"
+                "./src/lib/webdash-executer/webdash.config.json:build"
             ]
         }
     ]
