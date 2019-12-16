@@ -1,0 +1,3 @@
+/mnt/c/myworld/src/bin/_webdash-client/build/CMakeFiles/rebuild_cache.dir
+/mnt/c/myworld/src/bin/_webdash-client/build/CMakeFiles/webdash.dir
+/mnt/c/myworld/src/bin/_webdash-client/build/CMakeFiles/edit_cache.dir

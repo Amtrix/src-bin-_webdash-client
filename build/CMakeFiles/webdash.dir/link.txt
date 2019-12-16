@@ -1,0 +1,1 @@
+/usr/bin/g++-9  -std=c++1z -msse4.2 -Wall -Wextra -O3 -g -fopenmp -lstdc++fs   CMakeFiles/webdash.dir/src/main.cpp.o  -o webdash -L"/mnt/c/myworld/app-persistent/lib" /usr/lib/x86_64-linux-gnu/libboost_filesystem.so -lwebdash-executer /usr/lib/x86_64-linux-gnu/libboost_system.so 
