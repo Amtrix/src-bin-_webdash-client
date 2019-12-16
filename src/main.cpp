@@ -60,6 +60,27 @@ int main(int argc, char **argv) {
             return 0;
         }
 
+        if (strArg == "create-built-init") {
+            auto padd = WebDashCore::Get().GetPathAdditions();
+            auto envs = WebDashCore::Get().GetEnvAdditions();
+
+            WebDashCore::Get().WriteToMyStorage("init.sh", [&](WriterType writer) {
+                writer(WebDash::StoreWriteType::Clear, "");
+                
+                string out = "PATH=$PATH";
+                for (auto e : padd) out = out + ":" + e;
+                writer(WebDash::StoreWriteType::Append, out + "\n");
+
+                for (auto &[key, val] : envs) {
+                    writer(WebDash::StoreWriteType::Append, key + "=" + val + "\n");
+                }
+
+
+                writer(WebDash::StoreWriteType::End, "");
+            });
+            return 0;
+        }
+
         WebDashConfig wdConfig(configPath);
         auto ret = wdConfig.Run(argv[1]);
 
