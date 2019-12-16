@@ -310,13 +310,16 @@ void WebDashRegister(string configPath) {
     endpoint.send(id, "register " + configPath);
 }
 
-void WebDashList(string configPath) {
+vector<string> WebDashList(string configPath) {
     WebDashConfig wdConfig(configPath);
     auto cmds = wdConfig.GetTaskList();
 
+    vector<string> ret;
     for (size_t i = 0; i < cmds.size(); ++i) {
-        cout << "  " << cmds[i] << endl;
+        ret.push_back(cmds[i]);
     }
+
+    return ret;
 }
 
 void WebDashConfigList() {
