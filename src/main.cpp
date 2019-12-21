@@ -17,6 +17,7 @@
 #include <fstream>
 #include <filesystem>
 #include <optional>
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <sys/wait.h>
 
@@ -36,23 +37,22 @@ int main(int argc, char **argv) {
 
     bool was_handled = false;
     const fs::path configPath = fs::current_path() / "webdash.config.json";
-    std::optional<string> str_config_path = nullopt;
+    std::optional<string> o_path_arg = nullopt, o_cmd_arg = nullopt;
 
     if (std::filesystem::exists(configPath)) {
-        str_config_path = configPath;
+        o_path_arg = configPath;
     }
 
     if (argc >= 2) {
         const string strArg = string(argv[1]);
-        const string strPath = configPath.u8string();
 
-        if (strArg == "register-current" && str_config_path.has_value()) {
-            WebDashRegister(str_config_path.value());
+        if (strArg == "register-current" && o_path_arg.has_value()) {
+            WebDashRegister(o_path_arg.value());
             return 0;
         }
 
-        if (strArg == "list" && str_config_path.has_value()) {
-            WebDashList(str_config_path.value());
+        if (strArg == "list" && o_path_arg.has_value()) {
+            WebDashList(o_path_arg.value());
             return 0;
         }
 
@@ -75,23 +75,66 @@ int main(int argc, char **argv) {
                 for (auto &[key, val] : envs) {
                     writer(WebDash::StoreWriteType::Append, "export " + key + "=" + val + "\n");
                 }
+                writer(WebDash::StoreWriteType::End, "");
+            });
+            return 0;
+        }
 
+        if (strArg == "create-project-puller") {
+            auto entries = WebDashCore::Get().GetExternalProjects();
+            WebDashCore::Get().WriteToMyStorage("init-projects.sh", [&](WriterType writer) {
+                writer(WebDash::StoreWriteType::Clear, "");
+
+                for (auto entry : entries) {
+                    writer(WebDash::StoreWriteType::Append, "git clone " + entry.source + " " + entry.destination + "\n");
+                    writer(WebDash::StoreWriteType::Append, "webdash " + entry.destination + "/webdash.config.json" + entry.webdash_task + "\n");
+                }
 
                 writer(WebDash::StoreWriteType::End, "");
             });
             return 0;
         }
 
-        WebDashConfig wdConfig(str_config_path.value());
-        auto ret = wdConfig.Run(argv[1]);
+        if (strArg.find("webdash.config.json") != string::npos) {
+            cout << "Config file provided." << endl;
 
-        if (!ret.empty()) was_handled = true;
+            string patharg = "", cmdarg = "";
+            bool path_switch = false;
+            for (int i = ((int) strArg.size()) - 1; i >= 0; --i) {
+                if (strArg[i] == ':' && !path_switch) {
+                    path_switch = true;
+                    continue;
+                }
+
+                if (path_switch) {
+                    patharg += strArg[i];
+                } else {
+                    cmdarg += strArg[i];
+                }
+            }
+            std::reverse(patharg.begin(), patharg.end());
+            std::reverse(cmdarg.begin(), cmdarg.end());
+
+            o_path_arg = patharg;
+            o_cmd_arg = cmdarg;
+            
+            cout << patharg << " : " << cmdarg << endl;
+        }
+
+        if (o_path_arg.has_value()) {
+            WebDashConfig wdConfig(o_path_arg.value());
+            auto ret = wdConfig.Run(o_cmd_arg.value_or(argv[1]));
+
+            if (!ret.empty()) was_handled = true;
+        } else {
+            cout << "No config file specified NOR found in current directory." << endl;
+        }
     }
 
     if (!was_handled) {
         cout << "Please select one of the following:" << endl;
 
-        vector<string> cmds = WebDashList(str_config_path.value());
+        vector<string> cmds = WebDashList(o_path_arg.value());
     
         for (auto cmd : cmds)
             cout << " " << cmd << endl;
