@@ -28,33 +28,85 @@ using json = nlohmann::json;
 
 const string _WEBDASH_PROJECT_NAME_ = "webdash-client";
 
+pair<string, string> SplitOnLastColon(string str) {
+    string A = "", B = "";
+    bool path_switch = false;
+    for (int i = ((int)str.size()) - 1; i >= 0; --i) {
+        if (str[i] == ':' && !path_switch) {
+            path_switch = true;
+            continue;
+        }
+
+        if (path_switch) {
+            A += str[i];
+        } else {
+            B += str[i];
+        }
+    }
+
+    reverse(A.begin(), A.end());
+    reverse(B.begin(), B.end());
+
+    // if only B found, then make only A found instead.
+    if (!path_switch) {
+        swap(A, B);
+    }
+
+    return make_pair(A, B);
+}
+
+// Returns (config, cmd) if possible.
+std::optional<pair<WebDashConfig, string>> TryGetConfig(int argc, char **argv) {
+    std::optional<pair<WebDashConfig, string>> ret = nullopt;
+    std::optional<string> o_path_arg = nullopt, o_cmd_arg = nullopt;
+
+    vector<pair<string, std::optional<string>>> paths;
+
+    if (argc >= 2) {
+        const string strarg = string(argv[1]);
+        auto parts = SplitOnLastColon(strarg);
+        paths.push_back(make_pair(parts.first, parts.second));
+        paths.push_back(make_pair(parts.first + "/webdash.config.json", parts.second));
+    }
+
+    paths.push_back(make_pair(fs::current_path() / "webdash.config.json", nullopt));
+
+    for (auto path : paths) {
+        if (o_path_arg.has_value() == false && std::filesystem::exists(path.first)) {
+            auto tconfig = WebDashConfig(path.first);
+
+            if (!tconfig.IsInitialized())
+                continue;
+
+            o_path_arg = path.first;
+
+            if (path.second.has_value()) {
+                const string tcmd = path.second.value();
+                if (tcmd.length() > 0) o_cmd_arg = tcmd;
+                else if (argc >= 3) o_cmd_arg = argv[2];
+            } else if (argc >= 2) {
+                o_cmd_arg = argv[1];
+            }
+        }
+    }
+
+    // Here also handled `webdash build` case.
+    if (o_path_arg.has_value())
+        ret = std::make_optional(make_pair(WebDashConfig(o_path_arg.value()), o_cmd_arg.value_or("")));
+
+    return ret;
+}
+
 vector<string> ListClientCmds() {
-    return {"register-current", "list", "list-config", "create-built-init"};
+    return {"register", "list", "list-config", "create-built-init"};
 }
 
 int main(int argc, char **argv) {
     cout << "WebDash: Client (root: " << WebDashCore::Get().GetMyWorldRootDirectory() << ")" << endl;
 
-    bool was_handled = false;
-    const fs::path configPath = fs::current_path() / "webdash.config.json";
-    std::optional<string> o_path_arg = nullopt, o_cmd_arg = nullopt;
-
-    if (std::filesystem::exists(configPath)) {
-        o_path_arg = configPath;
-    }
-
+    // Commands config-independent.
     if (argc >= 2) {
         const string strArg = string(argv[1]);
-
-        if (strArg == "register-current" && o_path_arg.has_value()) {
-            WebDashRegister(o_path_arg.value());
-            return 0;
-        }
-
-        if (strArg == "list" && o_path_arg.has_value()) {
-            WebDashList(o_path_arg.value());
-            return 0;
-        }
 
         if (strArg == "list-config") {
             WebDashConfigList();
@@ -94,59 +146,45 @@ int main(int argc, char **argv) {
             });
             return 0;
         }
-
-        // When `webdash path-to-dir/webdash.config.json:build` is called.
-        if (strArg.find("webdash.config.json") != string::npos) {
-            cout << "Config file provided." << endl;
-
-            string patharg = "", cmdarg = "";
-            bool path_switch = false;
-            for (int i = ((int) strArg.size()) - 1; i >= 0; --i) {
-                if (strArg[i] == ':' && !path_switch) {
-                    path_switch = true;
-                    continue;
-                }
-
-                if (path_switch) {
-                    patharg += strArg[i];
-                } else {
-                    cmdarg += strArg[i];
-                }
-            }
-            std::reverse(patharg.begin(), patharg.end());
-            std::reverse(cmdarg.begin(), cmdarg.end());
-
-            o_path_arg = patharg;
-            o_cmd_arg = cmdarg;
-            
-            cout << patharg << " : " << cmdarg << endl;
-        }
-
-        // When `webdash :build` is called.
-        if (strArg[0] == ':' && !o_cmd_arg.has_value()) {
-            o_cmd_arg = strArg.substr(1);
-        }
-
-        if (o_path_arg.has_value()) {
-            WebDashConfig wdConfig(o_path_arg.value());
-            auto ret = wdConfig.Run(o_cmd_arg.value_or(argv[1]));
-
-            if (!ret.empty()) was_handled = true;
-        } else {
-            cout << "No config file specified NOR found in current directory." << endl;
-        }
     }
 
+    // No resolution? Try config specific.
+    bool was_handled = false;
+    auto configAndCmd = TryGetConfig(argc, argv);
+    
+    // Commands specific to a config file.
+    if (configAndCmd.has_value()) {
+        WebDashConfig config = configAndCmd.value().first;
+        const string cmd = configAndCmd.value().second;
+
+        if (cmd == "register") {
+            WebDashRegister(config.GetPath());
+            return 0;
+        } else if (cmd == "list") {
+            // just dont do anything. It's coming anyway.
+        } else if (cmd.length() > 0) {
+            auto ret = config.Run(configAndCmd.value().second);
+            if (!ret.empty()) was_handled = true;
+        }
+    } else {
+        cout << "No config provided NOR found in current directory." << endl;
+    }
+    
+
+    // Still not handled? Error.
     if (!was_handled) {
         cout << "Please select one of the following:" << endl;
 
-        vector<string> cmds = WebDashList(o_path_arg.value());
-    
-        for (auto cmd : cmds)
-            cout << " " << cmd << endl;
+        vector<string> cmds;
 
-        cout << "  ----  " << endl;
-        
+        if (configAndCmd.has_value()) {
+            cmds = WebDashList(configAndCmd.value().first.GetPath());
+            for (auto cmd : cmds)
+                cout << " " << cmd << endl;
+
+            cout << "  ----  " << endl;
+        }
+
         cmds = ListClientCmds();
 
         for (auto cmd : cmds)

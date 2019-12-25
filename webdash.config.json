@@ -12,7 +12,8 @@
             ],
             "dependencies": [
                 "./src/lib/webdash-executer/webdash.config.json:build"
-            ]
+            ],
+            "wdir": "$.thisDir()"
         }
     ]
 }
