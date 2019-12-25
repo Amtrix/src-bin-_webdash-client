@@ -11,6 +11,7 @@ include_directories(${EXTERNAL_LIB_PATH}/json/include)
 include_directories(${EXTERNAL_LIB_PATH}/websocketpp)
 include_directories($ENV{MYWORLD}/src/common)
 include_directories($ENV{MYWORLD}/src/lib/webdash-executer/include)
+include_directories(./include)
 
 
 ###### *.cpp code to compile
