@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
             return 0;
         }
 
+        // When `webdash path-to-dir/webdash.config.json:build` is called.
         if (strArg.find("webdash.config.json") != string::npos) {
             cout << "Config file provided." << endl;
 
@@ -119,6 +120,11 @@ int main(int argc, char **argv) {
             o_cmd_arg = cmdarg;
             
             cout << patharg << " : " << cmdarg << endl;
+        }
+
+        // When `webdash :build` is called.
+        if (strArg[0] == ':' && !o_cmd_arg.has_value()) {
+            o_cmd_arg = strArg.substr(1);
         }
 
         if (o_path_arg.has_value()) {
