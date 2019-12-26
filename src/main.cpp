@@ -72,11 +72,21 @@ int main(int argc, char **argv) {
                 for (auto entry : entries) {
                     writer(WebDash::StoreWriteType::Append, "git clone " + entry.source + " " + entry.destination + "\n");
                     writer(WebDash::StoreWriteType::Append, "webdash " + entry.destination + "/webdash.config.json" + entry.webdash_task + "\n");
+                    writer(WebDash::StoreWriteType::Append, "webdash register " + entry.destination + "/webdash.config.json\n");
                 }
 
                 writer(WebDash::StoreWriteType::End, "");
             });
             return 0;
+        }
+
+        if (strArg == "register" && argc >= 3) {
+            auto wconfig = WebDashConfig(argv[2]);
+            
+            if (wconfig.IsInitialized()) {
+                WebDashRegister(wconfig.GetPath());
+                return 0;
+            }
         }
     }
 
@@ -89,12 +99,14 @@ int main(int argc, char **argv) {
         WebDashConfig config = configAndCmd.value().first;
         const string cmd = configAndCmd.value().second;
 
-        if (cmd == "register") {
+        /*if (cmd == "register") {
             WebDashRegister(config.GetPath());
             return 0;
         } else if (cmd == "list") {
             // just dont do anything. It's coming anyway.
-        } else if (cmd.length() > 0) {
+        } else */
+        
+        if (cmd.length() > 0) {
             auto ret = config.Run(configAndCmd.value().second);
             if (!ret.empty()) was_handled = true;
         }
