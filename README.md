@@ -16,18 +16,19 @@
 <h3>How to design webdash.config.json</h3>
 <pre><code>{
     "commands": [
-    {
-        "name": "required-identifier"
-        "action": "&lt;executable_name&gt; &lt;arguments&gt;"
-        "actions": [
-            "&lt;executable_name1&gt; &lt;arguments1&gt;"
-            ...
-            "&lt;executable_nameN&gt; &lt;argumentsN&gt;"
-        ],
-        "frequency": "daily",
-        "when": "new-day",
-        "wdir": "$thisDir()"
-    }
+      {
+          "name": "required-identifier"
+          "action": "&lt;executable_name&gt; &lt;arguments&gt;"
+          "actions": [
+              "&lt;executable_name1&gt; &lt;arguments1&gt;"
+              ...
+              "&lt;executable_nameN&gt; &lt;argumentsN&gt;"
+          ],
+          "frequency": "daily",
+          "when": "new-day",
+          "wdir": "$thisDir()",
+          "notify-dashboard": true // adds entry to notifications log output.
+      }
     ]
 }</code></pre>
 
