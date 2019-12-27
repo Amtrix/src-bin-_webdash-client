@@ -13,4 +13,22 @@
   <li><code>webdash -list-config // to list <it>all</it> registered configs</code></li>
 </ul>
 
-<h3>Log output: <code>/app-temporary/logging/src-bin-_webdash-client</code></h3>
+<h3>How to design webdash.config.json</h3>
+<pre><code>{
+    "commands": [
+    {
+        "name": "required-identifier"
+        "action": "&lt;executable_name&gt; &lt;arguments&gt;"
+        "actions": [
+            "&lt;executable_name1&gt; &lt;arguments1&gt;"
+            ...
+            "&lt;executable_nameN&gt; &lt;argumentsN&gt;"
+        ],
+        "frequency": "daily",
+        "when": "new-day",
+        "wdir": "$thisDir()"
+    }
+    ]
+}</code></pre>
+
+<h3>Log output: <code>/app-temporary/logging/_webdash-client</code></h3>
