@@ -99,12 +99,10 @@ int main(int argc, char **argv) {
         WebDashConfig config = configAndCmd.value().first;
         const string cmd = configAndCmd.value().second;
 
-        /*if (cmd == "register") {
+        if (cmd == "register") {
             WebDashRegister(config.GetPath());
             return 0;
-        } else if (cmd == "list") {
-            // just dont do anything. It's coming anyway.
-        } else */
+        }
         
         if (cmd.length() > 0) {
             auto ret = config.Run(configAndCmd.value().second);

@@ -14,6 +14,16 @@
                 "./src/lib/webdash-executer/webdash.config.json:build"
             ],
             "wdir": "$.thisDir()"
+        },
+        {
+            "name": "report-repo-state",
+            "actions": [
+                "git status"
+            ],
+            "frequency": "daily",
+            "when": "new-day",
+            "notify-dashboard": true,
+            "wdir": "$.thisDir()"
         }
     ]
 }
