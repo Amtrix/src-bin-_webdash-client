@@ -1,7 +1,4 @@
 <h1>WebDash Client</h1>
-<ul>
-  <li>Positioned at: src/bin/_webdash-client</li>
-</ul>
 
 <h2>How to use</h2>
 <h3>Examples:</h3>
