@@ -17,7 +17,7 @@
 <pre><code>{
     "commands": [
       {
-          "name": "required-identifier"
+          "name": "required-identifier" // required.
           "action": "&lt;executable_name&gt; &lt;arguments&gt;"
           "actions": [
               "&lt;executable_name1&gt; &lt;arguments1&gt;"
@@ -26,8 +26,8 @@
           ],
           "frequency": "daily",
           "when": "new-day",
-          "wdir": "$thisDir()",
-          "notify-dashboard": true // adds entry to notifications log output.
+          "wdir": "$thisDir()",    
+          "notify-dashboard": true // adds entry to notifications log output when run.
       }
     ]
 }</code></pre>
