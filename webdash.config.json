@@ -16,13 +16,26 @@
             "wdir": "$.thisDir()"
         },
         {
-            "name": "report-repo-state",
+            "name": "report-build-state",
             "actions": [
-                "git status"
+                "report-build-state build"
             ],
             "frequency": "daily",
             "when": "new-day",
-            "notify-dashboard": true,
+            "wdir": "$.thisDir()"
+        },
+        {
+            "name": "git-status",
+            "action": "git status",
+            "wdir": "$.thisDir()"
+        },
+        {
+            "name": "report-repo-state",
+            "actions": [
+                "report-repo-state git-status"
+            ],
+            "frequency": "daily",
+            "when": "new-day",
             "wdir": "$.thisDir()"
         }
     ]

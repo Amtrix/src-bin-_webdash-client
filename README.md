@@ -23,7 +23,7 @@
           ],
           "frequency": "daily",
           "when": "new-day",
-          "wdir": "$thisDir()",    
+          "wdir": "$.thisDir()",    
           "notify-dashboard": true // adds entry to notifications log output when run.
       }
     ]
