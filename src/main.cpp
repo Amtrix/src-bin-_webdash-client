@@ -46,16 +46,22 @@ fi
 
 namespace NATIVE_COMMANDS {
     string REGISTER = "register";
+    string UNREGISTER = "unregister";
+    string RELOADALL = "reload-all";
     string LIST = "list";
     string LIST_CONFIG = "list-config";
+    string LIST_DEFINITIONS = "list-definitions";
     string _INT_CREATE_BUILD_INIT = _WEBDASH_INTERNAL_CMD_PREFIX + "create-build-init";
     string _INT_CREATE_PROJECT_CLONER = _WEBDASH_INTERNAL_CMD_PREFIX + "create-project-cloner";
 };
 
 vector<string> ListClientCmds() {
     return { NATIVE_COMMANDS::REGISTER,
+             NATIVE_COMMANDS::UNREGISTER,
+             NATIVE_COMMANDS::RELOADALL,
              NATIVE_COMMANDS::LIST,
              NATIVE_COMMANDS::LIST_CONFIG,
+             NATIVE_COMMANDS::LIST_DEFINITIONS,
              NATIVE_COMMANDS::_INT_CREATE_BUILD_INIT,
              NATIVE_COMMANDS::_INT_CREATE_PROJECT_CLONER };
 }
@@ -68,6 +74,12 @@ bool IsInternalCommand(string cmd) {
 
 int main(int argc, char **argv) {
     cout << "WebDash: Client (root: " << WebDashCore::Get().GetMyWorldRootDirectory() << ")" << endl;
+    cout.flush();
+    cout << "> args[" << argc << "] = ";
+    for (int i = 0; i < argc; ++i)
+        cout << argv[i] << " ";
+    cout << endl;
+    cout.flush();
 
     // Commands config-independent.
     if (argc >= 2) {
@@ -125,10 +137,24 @@ int main(int argc, char **argv) {
         if (strArg == NATIVE_COMMANDS::REGISTER && argc >= 3) {
             auto wconfig = WebDashConfig(argv[2]);
             
-            if (wconfig.IsInitialized()) {
+            if (wconfig.IsLoaded()) {
                 WebDashRegister(wconfig.GetPath());
                 return 0;
             }
+        }
+
+        if (strArg == NATIVE_COMMANDS::UNREGISTER && argc >= 3) {
+            auto wconfig = WebDashConfig(argv[2]);
+            
+            if (wconfig.IsLoaded()) {
+                WebDashUnRegister(wconfig.GetPath());
+                return 0;
+            }
+        }
+
+        if (strArg == NATIVE_COMMANDS::RELOADALL && argc >= 2) {
+            WebDashReloadAll();
+            return 0;
         }
     }
 
@@ -141,8 +167,26 @@ int main(int argc, char **argv) {
         WebDashConfig config = configAndCmd.value().first;
         const string cmd = configAndCmd.value().second;
 
-        if (cmd == "register") {
+        if (cmd == NATIVE_COMMANDS::REGISTER) {
             WebDashRegister(config.GetPath());
+            return 0;
+        }
+
+        if (cmd == NATIVE_COMMANDS::UNREGISTER) {
+            WebDashUnRegister(config.GetPath());
+            return 0;
+        }
+
+        if (cmd == NATIVE_COMMANDS::LIST_DEFINITIONS) {
+            auto definitions = config.GetAllDefinitions();
+            size_t lwidth = 3, rwidth = 3;
+            for (const auto& def: definitions) {
+                lwidth = max(lwidth, def.first.size() + 3);
+                rwidth = max(rwidth, def.second.size() + 3);
+            }
+
+            for (const auto& def: definitions)
+                cout << std::left << setw(lwidth) << def.first << setw(rwidth) << def.second << endl;
             return 0;
         }
         

@@ -310,6 +310,30 @@ void WebDashRegister(string configPath) {
     endpoint.send(id, "register " + configPath);
 }
 
+void WebDashUnRegister(string configPath) {
+    websocket_endpoint endpoint;
+
+    int id = -1;
+    if ((id = ConnectEndpoint(&endpoint)) == -1)
+        return;
+    
+    cout << *endpoint.get_metadata(id) << endl;
+
+    endpoint.send(id, "unregister " + configPath);
+}
+
+void WebDashReloadAll() {
+    websocket_endpoint endpoint;
+
+    int id = -1;
+    if ((id = ConnectEndpoint(&endpoint)) == -1)
+        return;
+    
+    cout << *endpoint.get_metadata(id) << endl;
+
+    endpoint.send(id, "reload *");
+}
+
 vector<string> WebDashList(string configPath) {
     WebDashConfig wdConfig(configPath);
     auto cmds = wdConfig.GetTaskList();

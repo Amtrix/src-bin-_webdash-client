@@ -68,7 +68,7 @@ inline std::optional<pair<WebDashConfig, string>> TryGetConfig(int argc, char **
             auto tconfig = WebDashConfig(path.first);
 
             // We could have tested a directory with fs::exists. Make sure it is an actual config file.
-            if (!tconfig.IsInitialized())
+            if (!tconfig.IsLoaded())
                 continue;
 
             o_path_arg = path.first;
