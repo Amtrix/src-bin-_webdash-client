@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
                 writer(WebDash::StoreWriteType::Clear, "");
 
                 for (auto entry : entries) {
-                    writer(WebDash::StoreWriteType::Append, "rm -r " + entry.destination + "\n");
+                    writer(WebDash::StoreWriteType::Append, "rm -rf " + entry.destination + "\n");
                     writer(WebDash::StoreWriteType::Append, "git clone " + entry.source + " " + entry.destination + "\n");
                     writer(WebDash::StoreWriteType::Append, "webdash " + entry.destination + "/webdash.config.json" + entry.webdash_task + "\n");
 
